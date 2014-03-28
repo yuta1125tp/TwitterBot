@@ -1,0 +1,5 @@
+cron:
+ - description: kick yutabottp
+   url: /.*
+   schedule: every 5 hours
+   timezone: Asia/Tokyo
