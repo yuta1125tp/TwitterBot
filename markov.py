@@ -32,6 +32,49 @@ def wakati(text):
     return result
 """
 
+def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|10|11|12|13"):
+    # MeCabを利用してわかつ
+    # 改行文字が除かれていないので注意。
+    if isinstance(sentence, list):
+        # 文章をURLエンコーディング
+        result = []
+        for i in xrange(len(sentence)):
+            # print i
+            sentence_encoded = urllib.quote_plus(sentence[i].encode("utf-8"))
+            query = u"%s?appid=%s&results=%s&filter=%s&sentence=%s" % (pageurl, appid, results, filter, sentence_encoded)
+            c = urllib2.urlopen(query)
+            soup = BeautifulSoup(c.read())
+            """
+            return [(w.surface.string, w.reading.string, w.pos.string)
+                    for w in soup.ma_result.word_list]
+            """
+            result_tuple = [(w.surface.string, w.reading.string, w.pos.string)
+                      for w in soup.ma_result.word_list]
+            for i in xrange(len(result_tuple)):
+                # 長さ3のタプルだけど、こんな形式なので1つ目のみを使う(大学、だいがく、名詞)
+                result.append(result_tuple[i][0])
+        return result        
+    elif instance(sentence, unicode): # 引数がUnicode
+        # 文章をURLエンコーディング
+        sentence = urllib.quote_plus(sentence.encode("utf-8"))
+        query = u"%s?appid=%s&results=%s&filter=%s&sentence=%s" % (pageurl, appid, results, filter, sentence)
+        c = urllib2.urlopen(query)
+        soup = BeautifulSoup(c.read())
+        """
+        return [(w.surface.string, w.reading.string, w.pos.string)
+                for w in soup.ma_result.word_list]
+        """
+        result_tuple = [(w.surface.string, w.reading.string, w.pos.string)
+                  for w in soup.ma_result.word_list]
+        result = []
+        for i in xrange(len(result_tuple)):
+            # 長さ3のタプルだけど、こんな形式なので1つ目のみを使う(大学、だいがく、名詞)
+            result.append(result_tuple[i][0])   
+        return result
+    else:
+        print 'sentence is invalid!'
+        exit()
+
 def wakati_Yahoo(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|10|11|12|13"):
     # Yahooのサービスを利用
     # 改行文字が除かれていないので注意。
