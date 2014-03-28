@@ -177,11 +177,15 @@ def tweet_msg():
 
     import markov
     wordlist=[]
+    # MeCabならURLを経由しないから全部まるっと投げてしまっていい。
+    wordlist=markov.wakati_MeCab(tweet_unicode_list)
     # いっぺんに投げるとyahooに投げるURLが長くなりすぎてダメなので1ツイートごと細かく区切る
+    """
     for tweet in tweet_unicode_list:
         # print tweet
         wordlist=wordlist+markov.wakati_MeCab([tweet])
         # wordlist=wordlist+markov.wakati_Yahoo([tweet])
+    """
     """
     wordlist = markov.wakati_Yahoo(tweet_unicode_list) # ここで元となる文章が分かち書きに変換される
     """
