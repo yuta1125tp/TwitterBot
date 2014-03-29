@@ -113,9 +113,10 @@ def tweet_msg():
     
     tweet_dict = get_samples(api)
     
-    remove_tweet.remove_at_tweet(tweet_dict)
-    remove_tweet.remove_url_tweet(tweet_dict)
-    remove_tweet.remove_retweet(tweet_dict)
+    #remove_tweet.remove_at_tweet(tweet_dict)
+    #remove_tweet.remove_url_tweet(tweet_dict)
+    #remove_tweet.remove_retweet(tweet_dict)
+    
     # 辞書として持ってても仕方ないので辞書の解体
     # 全部合わせて1つのUnicode型変数にする。
     # 全部合わせて1つにするとURLエンコードした時にGAEから開けるURLの上限の長さを超えてしまう。
@@ -128,12 +129,18 @@ def tweet_msg():
             tweet_unicode += tweet_dict[i][j]
     
     # cronで呼び出すと相対パスの始まりがずれるみたい。
-    f = open('/home/ec2-user/bot/tweet_log.pkl')
+    import os
+    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    f = open(abspath_to_script+'/tweet_log.pkl')
     l = pickle.load(f)
     f.close()
 
     # twitte apiで取ってきた分ともともと保持していた自分のつぶやき履歴を連結する
     tweet_unicode_list=tweet_unicode_list+l 
+    
+    remove_tweet.remove_retweet(tweet_unicode_list)
+    remove_tweet.remove_at_tweet(tweet_unicode_list)
+    remove_tweet.remove_url_tweet(tweet_unicode_list)
     
     # print tweet_unicode
     # src = codecs.open("samples.txt", 'r', 'utf-8').read()

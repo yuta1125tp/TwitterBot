@@ -213,6 +213,8 @@ if __name__ == "__main__":
     time.sleep(1)
 
     remove_tweet.remove_retweet(tweet_log)
+    remove_tweet.remove_at_tweet(tweet_log)
+    remove_tweet.remove_url_tweet(tweet_log)
     for i in xrange(10):
         print i,',',tweet_log[i]
     print 
