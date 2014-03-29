@@ -138,6 +138,7 @@ def tweet_msg():
     # twitte apiで取ってきた分ともともと保持していた自分のつぶやき履歴を連結する
     tweet_unicode_list=tweet_unicode_list+l 
     
+    # よろしくないツイートを除く
     remove_tweet.remove_retweet(tweet_unicode_list)
     remove_tweet.remove_at_tweet(tweet_unicode_list)
     remove_tweet.remove_url_tweet(tweet_unicode_list)
