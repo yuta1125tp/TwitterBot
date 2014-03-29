@@ -171,7 +171,8 @@ def tweet_msg():
     l = pickle.load(f)
     f.close()
 
-    tweet_unicode_list=tweet_unicode_list+l
+    # twitte apiで取ってきた分ともともと保持していた自分のつぶやき履歴を連結する
+    tweet_unicode_list=tweet_unicode_list+l 
     
     # print tweet_unicode
     # src = codecs.open("samples.txt", 'r', 'utf-8').read()
@@ -180,26 +181,15 @@ def tweet_msg():
     wordlist=[]
     # MeCabならURLを経由しないから全部まるっと投げてしまっていい。
     wordlist=markov.wakati_MeCab(tweet_unicode_list)
-    # いっぺんに投げるとyahooに投げるURLが長くなりすぎてダメなので1ツイートごと細かく区切る
+    
     """
+    # いっぺんに投げるとyahooに投げるURLが長くなりすぎてダメなので1ツイートごと細かく区切る
     for tweet in tweet_unicode_list:
         # print tweet
         wordlist=wordlist+markov.wakati_MeCab([tweet])
         # wordlist=wordlist+markov.wakati_Yahoo([tweet])
     """
-    """
-    wordlist = markov.wakati_Yahoo(tweet_unicode_list) # ここで元となる文章が分かち書きに変換される
-    """
-    """
-    f = open('wordlist.pkl','w')
-    pickle.dump(wordlist,f)
-    f.close()
-    del wordlist
-    
-    f = open('wordlist.pkl','r')
-    wordlist = pickle.load(f)
-    f.close()   
-    """
+
     mc_table = markov.make_MC_table2(wordlist)
     
     sentence = markov.generate_sentence2(mc_table, wordlist)

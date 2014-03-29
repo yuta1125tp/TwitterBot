@@ -37,40 +37,22 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
     # MeCabを利用してわかつ
     # 改行文字が除かれていないので注意。
     t = MeCab.Tagger("-Owakati")
-    #m = t.parse(text.encode('utf-8'))
-    # parseで分かち書きにされるのはスペースで区切られたstr
-    # print 'print m'
-    # print m #.encode('utf-8')
-    # Unix系ならrstripするのは\nだけでいいけど、Windowsは\r\nを除いてあげなきゃいけない
-    # result = m.rstrip(" \r\n").split(" ")
-    # そのstrからスペース+改行文字を除き、スペース毎に分割したものがlist構造で格納されてるresult
-    # MeCabで処理した結果は文字列型なのでUnicode型にデコードしてやる
-    #for i in xrange(len(result)):
-    #    result[i] = unicode(result[i], 'utf-8', 'ignore')    
-    #return result
-    
+        
     if isinstance(sentence, list): # 引数がリストオブジェクト
         # 文章をURLエンコーディング
         total_result = []
         for i in xrange(len(sentence)):
-            # print i
+            # parseで分かち書きにされるのはスペースで区切られたstr
+            # print 'print m'
+            # print m #.encode('utf-8')
             m = t.parse(sentence[i].encode("utf-8"))
+            # Unix系ならrstripするのは\nだけでいいけど、Windowsは\r\nを除いてあげなきゃいけない
             result = m.rstrip(" \r\n").split(" ")
-            
+            # そのstrからスペース+改行文字を除き、スペース毎に分割したものがlist構造で格納されてるresult
             # MeCabで処理した結果は文字列型なのでUnicode型にデコードしてやる
             for i in xrange(len(result)):
                 total_result.append(unicode(result[i], 'utf-8', 'ignore'))
-            """
-            sentence_encoded = urllib.quote_plus(sentence[i].encode("utf-8"))
-            query = u"%s?appid=%s&results=%s&filter=%s&sentence=%s" % (pageurl, appid, results, filter, sentence_encoded)
-            c = urllib2.urlopen(query)
-            soup = BeautifulSoup(c.read())
-            result_tuple = [(w.surface.string, w.reading.string, w.pos.string)
-                      for w in soup.ma_result.word_list]
-            for i in xrange(len(result_tuple)):
-                # 長さ3のタプルだけど、こんな形式なので1つ目のみを使う(大学、だいがく、名詞)
-                result.append(result_tuple[i][0])
-            """
+
         return total_result  
         
     elif instance(sentence, unicode): # 引数がUnicode
@@ -79,10 +61,7 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
         query = u"%s?appid=%s&results=%s&filter=%s&sentence=%s" % (pageurl, appid, results, filter, sentence)
         c = urllib2.urlopen(query)
         soup = BeautifulSoup(c.read())
-        """
-        return [(w.surface.string, w.reading.string, w.pos.string)
-                for w in soup.ma_result.word_list]
-        """
+
         result_tuple = [(w.surface.string, w.reading.string, w.pos.string)
                   for w in soup.ma_result.word_list]
         result = []
@@ -91,7 +70,7 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
             result.append(result_tuple[i][0])   
         return result
     else:
-        print 'sentence is invalid!'
+        print 'invalid argument'
         exit()
 
 def wakati_Yahoo(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|10|11|12|13"):
@@ -222,9 +201,9 @@ if __name__ == "__main__":
     wordlist = wakati_MeCab(pickle.load(f))
 
     #wordlist = wakati(src) # ここで元となる文章が分かち書きに変換される
-    markov = make_MC_table1(wordlist)
+    markov = make_MC_table2(wordlist)
     
-    sentence = generate_sentence1(markov, wordlist)
+    sentence = generate_sentence2(markov, wordlist)
     
     tmp = re.split(u'。', sentence)
     print tmp[0]
