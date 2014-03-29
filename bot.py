@@ -216,15 +216,6 @@ def tweet_msg():
     except twython.TwythonError as e:
         print e    
 
-class MainHandler(webapp2.RequestHandler):
-    def get(self): 
-        tweet_msg()
-        self.response.write('Hello world!')
- 
-app = webapp2.WSGIApplication([
-    ('/.*', MainHandler)
-], debug=True)
-
 if __name__=="__main__":
     tweet_msg()
 
