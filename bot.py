@@ -165,8 +165,9 @@ def tweet_msg():
         for j in xrange(len(tweet_dict[i])):
             tweet_unicode_list.append(tweet_dict[i][j])
             tweet_unicode += tweet_dict[i][j]
-
-    f = open('tweet_log.pkl')
+    
+    # cronで呼び出すと相対パスの始まりがずれるみたい。
+    f = open('/home/ec2-user/bot/tweet_log.pkl')
     l = pickle.load(f)
     f.close()
 
