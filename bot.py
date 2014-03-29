@@ -7,7 +7,9 @@ import random # randint使うときに必要
 import sys # 標準出力の文字コードを変更するために用いる
 
 import re # 正規表現のマッチングかける時
+
 import markov # 文書生成のためのマルコフ課程周りの関数が入ってる。
+import remove_tweet # @や#を含むツイートを削除する
 
 import pickle # つぶやきログがpickleで保存されてるのを読み込むため
 
@@ -75,48 +77,7 @@ def get_samples(api, name='kawabottp'):
 
     # pbar.finish()
     return tweet_dict
-    
-def remove_at_tweet(tweet_dict):
-    # 知らない人への@ツイートや#のハッシュタグをしてしまわないように
-    index = []
-    for follower_id in tweet_dict.keys():
-        for i in xrange(len(tweet_dict[follower_id])):
-            if bool(re.search(u'.*@.*', tweet_dict[follower_id][i])):
-                index.append(i)
-            elif bool(re.search(u'.*#.*', tweet_dict[follower_id][i])):
-                index.append(i)
-        for j in reversed(index):
-            tweet_dict[follower_id].pop(j)
-    
-def remove_url_tweet(tweet_dict):
-    # URLに繋がりそうなツイートは除く
-    index = []
-    url_keywords = [
-        u'goo', u'pic.', u'.com', u'http', u'.ly', u',me']
-    for follower_id in tweet_dict.keys():
-        for i in xrange(len(tweet_dict[follower_id])):
-            for key_word in url_keywords:
-                if bool(re.search(u'.*' + key_word + u'.*', 
-                                  tweet_dict[follower_id][i])):
-                    index.append(i)
-                    break
-        for j in reversed(index):
-            tweet_dict[follower_id].pop(j)
-
-def remove_retweet(tweet_dict):
-    # 引用やリツイートしないようにする
-    # RT, QT
-    # これを除く。
-    index = []
-    for follower_id in tweet_dict.keys():
-        for i in xrange(len(tweet_dict[follower_id])):
-            if bool(re.search(u'.*RT.*', tweet_dict[follower_id][i])):
-                index.append(i)
-            elif bool(re.search(u'.*QT.*', tweet_dict[follower_id][i])):
-                index.append(i)
-        for j in reversed(index):
-            tweet_dict[follower_id].pop(j)
-    
+        
 def get_friends_id(api, name):
     # 指定したユーザー"が"フォローしているユーザーのID一覧を返す
     try:
@@ -152,9 +113,9 @@ def tweet_msg():
     
     tweet_dict = get_samples(api)
     
-    remove_at_tweet(tweet_dict)
-    remove_url_tweet(tweet_dict)
-    remove_retweet(tweet_dict)
+    remove_tweet.remove_at_tweet(tweet_dict)
+    remove_tweet.remove_url_tweet(tweet_dict)
+    remove_tweet.remove_retweet(tweet_dict)
     # 辞書として持ってても仕方ないので辞書の解体
     # 全部合わせて1つのUnicode型変数にする。
     # 全部合わせて1つにするとURLエンコードした時にGAEから開けるURLの上限の長さを超えてしまう。
@@ -193,10 +154,11 @@ def tweet_msg():
     mc_table = markov.make_MC_table2(wordlist)
     
     sentence = markov.generate_sentence2(mc_table, wordlist)
-    sentence_list = re.split(u'。', sentence)
+    sentence_list = re.split(u'\n', sentence)
     tweet = u""
     tweet_index=0
     while(1):
+        # 何もない文章が候補に上がる場合がある。
         if sentence_list[tweet_index]!=u'':
             break
         tweet_index += 1

@@ -11,6 +11,11 @@ from BeautifulSoup import BeautifulSoup
 import pickle
 
 import sys
+
+import time # sleep関数のため
+
+import remove_tweet
+
 # sys.stdin  = codecs.getreader('utf-8')(sys.stdin)
 # sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
@@ -36,10 +41,10 @@ def wakati(text):
 def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|10|11|12|13"):
     # MeCabを利用してわかつ
     # 改行文字が除かれていないので注意。
+    # 返すものはUnicode型の分かち書きされた言葉が入ったリスト
     t = MeCab.Tagger("-Owakati")
         
     if isinstance(sentence, list): # 引数がリストオブジェクト
-        # 文章をURLエンコーディング
         total_result = []
         for i in xrange(len(sentence)):
             # parseで分かち書きにされるのはスペースで区切られたstr
@@ -51,24 +56,26 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
             # そのstrからスペース+改行文字を除き、スペース毎に分割したものがlist構造で格納されてるresult
             # MeCabで処理した結果は文字列型なのでUnicode型にデコードしてやる
             for i in xrange(len(result)):
-                total_result.append(unicode(result[i], 'utf-8', 'ignore'))
-
-        return total_result  
-        
+                total_result.append(unicode(result[i], 'utf-8', errors='ignore'))
+            # 1つづつのツイートの最後に改行文字を挟むことで複数ツイートが連続して繋がるのを防ぐ。
+            total_result.append(u"\n")
+        return total_result
+    
     elif instance(sentence, unicode): # 引数がUnicode
         # 文章をURLエンコーディング
-        sentence = urllib.quote_plus(sentence.encode("utf-8"))
-        query = u"%s?appid=%s&results=%s&filter=%s&sentence=%s" % (pageurl, appid, results, filter, sentence)
-        c = urllib2.urlopen(query)
-        soup = BeautifulSoup(c.read())
+        total_result = []
 
-        result_tuple = [(w.surface.string, w.reading.string, w.pos.string)
-                  for w in soup.ma_result.word_list]
-        result = []
-        for i in xrange(len(result_tuple)):
-            # 長さ3のタプルだけど、こんな形式なので1つ目のみを使う(大学、だいがく、名詞)
-            result.append(result_tuple[i][0])   
-        return result
+        # parseで分かち書きにされるのはスペースで区切られたstr
+        m = t.parse(sentence.encode("utf-8"))
+        # Unix系ならrstripするのは\nだけでいいけど、Windowsは\r\nを除いてあげなきゃいけない
+        result = m.rstrip(" \r\n").split(" ")
+        # そのstrからスペース+改行文字を除き、スペース毎に分割したものがlist構造で格納されてるresult
+        # MeCabで処理した結果は文字列型なのでUnicode型にデコードしてやる
+        for i in xrange(len(result)):
+            total_result.append(unicode(result[i], 'utf-8', 'ignore'))
+        #total_result.append(unicode("\n", errors='utf-8'))
+        return total_result
+        
     else:
         print 'invalid argument'
         exit()
@@ -198,15 +205,40 @@ if __name__ == "__main__":
     """
     
     f = open('tweet_log.pkl')
-    wordlist = wakati_MeCab(pickle.load(f))
+    tweet_log = pickle.load(f)
+    
+    for i in xrange(10):
+        print i,',',tweet_log[i]
+    print 
+    time.sleep(1)
 
-    #wordlist = wakati(src) # ここで元となる文章が分かち書きに変換される
+    remove_tweet.remove_retweet(tweet_log)
+    for i in xrange(10):
+        print i,',',tweet_log[i]
+    print 
+    time.sleep(1)
+    
+    wordlist = wakati_MeCab(tweet_log[0:10]) 
+    
+    for i in xrange(len(wordlist)):
+        print i,',',wordlist[i]
+
+    print 
+    time.sleep(1)
+    
     markov = make_MC_table2(wordlist)
     
     sentence = generate_sentence2(markov, wordlist)
     
-    tmp = re.split(u'。', sentence)
-    print tmp[0]
+    print sentence
+    
+    splited_sentence = re.split(u'\n', sentence)
+    
+    # Unicode型はprint関数で出力すると日本語で表示される
+    for i in xrange(len(splited_sentence)):
+        print i,',',splited_sentence[i]
+        
+        
     # 保存する際はUnicode型から文字列型にエンコードする
     fout.write(sentence.encode('utf-8'))
     # print sentence.encode('utf-8')
