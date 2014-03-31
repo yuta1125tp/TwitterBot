@@ -46,6 +46,7 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
         
     if isinstance(sentence, list): # 引数がリストオブジェクト
         total_result = []
+        total_result.append(u"\n") # 改行文字をつぶやきの先頭のサインとする
         for i in xrange(len(sentence)):
             # parseで分かち書きにされるのはスペースで区切られたstr
             # print 'print m'
@@ -159,7 +160,10 @@ def generate_sentence2(MCtable, wordlist):
     count = 0
     sentence = u""
     # 生成する文章のはじめの2単語はランダムに選ぶ 
-    w1, w2  = random.choice(MCtable.keys())
+    # w1, w2  = random.choice(MCtable.keys())
+    # 生成する文章の初めの1単語を選ぶ。0単語相当は改行文字u"\n"
+    w1 = u"\n"
+    w2 = random.choice(MCtable.keys())[0]
     sentence += w1
     sentence += w2
     while count < len(wordlist):
@@ -171,7 +175,9 @@ def generate_sentence2(MCtable, wordlist):
         # キーがない場合はもう一度キーを取り直す。
         # 学習用の文章が十分多かったらそんなことなくなるんだろうけど。。。
         if not MCtable.has_key((w1, w2)):
-            w1, w2  = random.choice(MCtable.keys())
+            # w1, w2  = random.choice(MCtable.keys())
+            w1 = u"\n"
+            w2 = random.choice(MCtable.keys())[0]
         tmp = random.choice(MCtable[(w1, w2)])
         # print tmp
         sentence += tmp
@@ -205,6 +211,8 @@ if __name__ == "__main__":
     """
     
     f = open('tweet_log.pkl')
+    
+    # 保存されているのはツイートがリスト形式で保存されている
     tweet_log = pickle.load(f)
     
     for i in xrange(10):
@@ -212,9 +220,11 @@ if __name__ == "__main__":
     print 
     time.sleep(1)
 
+    # 不要なツイートはリストから削除する
     remove_tweet.remove_retweet(tweet_log)
     remove_tweet.remove_at_tweet(tweet_log)
     remove_tweet.remove_url_tweet(tweet_log)
+    
     for i in xrange(10):
         print i,',',tweet_log[i]
     print 
