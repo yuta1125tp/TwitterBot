@@ -45,8 +45,7 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
     t = MeCab.Tagger("-Owakati")
         
     if isinstance(sentence, list): # 引数がリストオブジェクト
-        total_result = []
-        total_result.append(u"\n") # 改行文字をつぶやきの先頭のサインとする
+        total_result = [[],[]]
         for i in xrange(len(sentence)):
             # parseで分かち書きにされるのはスペースで区切られたstr
             # print 'print m'
@@ -56,10 +55,12 @@ def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
             result = m.rstrip(" \r\n").split(" ")
             # そのstrからスペース+改行文字を除き、スペース毎に分割したものがlist構造で格納されてるresult
             # MeCabで処理した結果は文字列型なのでUnicode型にデコードしてやる
-            for i in xrange(len(result)):
-                total_result.append(unicode(result[i], 'utf-8', errors='ignore'))
+            for j in xrange(len(result)):
+                total_result[0].append(unicode(result[j], 'utf-8', errors='ignore'))
+                total_result[1].append(j)
             # 1つづつのツイートの最後に改行文字を挟むことで複数ツイートが連続して繋がるのを防ぐ。
-            total_result.append(u"\n")
+            total_result[0].append(u"\n")
+            total_result[1].append(-1) # 改行文字のところのidxは-1にしておく？
         return total_result
     
     elif instance(sentence, unicode): # 引数がUnicode
@@ -99,9 +100,9 @@ def wakati_Yahoo(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|
             """
             result_tuple = [(w.surface.string, w.reading.string, w.pos.string)
                       for w in soup.ma_result.word_list]
-            for i in xrange(len(result_tuple)):
+            for j in xrange(len(result_tuple)):
                 # 長さ3のタプルだけど、こんな形式なので1つ目のみを使う(大学、だいがく、名詞)
-                result.append(result_tuple[i][0])
+                result.append(result_tuple[j][0])
         return result        
     elif instance(sentence, unicode): # 引数がUnicode
         # 文章をURLエンコーディング
@@ -131,11 +132,13 @@ def make_MC_table2(wordlist):
     # wordlistにどんどん事例を保存していく。
     # 事例: (w1, w2) -> w3
     # 直前の2単語？をキーに次につづく単語を予測
-    for word in wordlist:
-        if w1 and w2:
+    for i in xrange(len(wordlist[0])):
+        word = wordlist[0][i]
+        idx = wordlist[1][i]
+        if w1 and w2: # u""はFalse扱い
             if (w1, w2) not in markov:
                 markov[(w1, w2)] = [] # 初めて見る単語の連続だった場合はキーに登録
-            markov[(w1, w2)].append(word) # そのキーの後に単語を登録(リスト)
+            markov[(w1, w2)].append((word,idx)) # そのキーの後に続く単語を登録(リスト)
         w1, w2 = w2, word # 次の単語に写る
     return markov
     
@@ -159,14 +162,23 @@ def generate_sentence2(MCtable, wordlist):
     # 前の単語1つに注目
     count = 0
     sentence = u""
-    # 生成する文章のはじめの2単語はランダムに選ぶ 
-    # w1, w2  = random.choice(MCtable.keys())
-    # 生成する文章の初めの1単語を選ぶ。0単語相当は改行文字u"\n"
-    w1 = u"\n"
-    w2 = random.choice(MCtable.keys())[0]
+    # 生成する文章のはじめの2単語はランダムに選ぶ
+    """
+    for w1,w2 in MCtable.keys():
+        #print type(MCtable[(w1,w2)])
+        #print MCtable
+        #for i in xrange(len(MCtable[(w1,w2)])):
+        #    print MCtable[(w1,w2)][i][0],
+    """
+    
+    while(1):
+        w1,w2 = random.choice(MCtable.keys())
+        if MCtable.has_key((w1, w2)):
+            if MCtable[(w1,w2)][0][1]==2: # w3相当のidx=2
+                break
     sentence += w1
     sentence += w2
-    while count < len(wordlist):
+    while count < len(wordlist[0]):
         # 直前の2単語をもとにその後ろにくる単語を事例ベースで予測。
         # 事例が複数ある場合はランダムに選ぶ
 
@@ -175,13 +187,11 @@ def generate_sentence2(MCtable, wordlist):
         # キーがない場合はもう一度キーを取り直す。
         # 学習用の文章が十分多かったらそんなことなくなるんだろうけど。。。
         if not MCtable.has_key((w1, w2)):
-            # w1, w2  = random.choice(MCtable.keys())
-            w1 = u"\n"
-            w2 = random.choice(MCtable.keys())[0]
+            w1, w2  = random.choice(MCtable.keys())
         tmp = random.choice(MCtable[(w1, w2)])
         # print tmp
-        sentence += tmp
-        w1, w2 = w2, tmp
+        sentence += tmp[0]
+        w1, w2 = w2, tmp[0]
         count += 1
     return sentence
     
@@ -232,8 +242,8 @@ if __name__ == "__main__":
     
     wordlist = wakati_MeCab(tweet_log[0:10]) 
     
-    for i in xrange(len(wordlist)):
-        print i,',',wordlist[i]
+    for i in xrange(len(wordlist[0])):
+        print i,',',wordlist[0][i],',',wordlist[1][i]
 
     print 
     time.sleep(1)
