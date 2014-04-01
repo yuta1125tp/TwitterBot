@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+# twython経由でTwitterのAPIを叩く
 
 # twythonを使ったテストコード
 import twython # pythonからtwitterをごちゃごちゃできるライブラリ
@@ -10,6 +11,7 @@ import re # 正規表現のマッチングかける時
 
 import markov # 文書生成のためのマルコフ課程周りの関数が入ってる。
 import remove_tweet # @や#を含むツイートを削除する
+import control_tweet # 生成したつぶやきをいじくるモジュール
 
 import pickle # つぶやきログがpickleで保存されてるのを読み込むため
 
@@ -150,20 +152,16 @@ def tweet_msg():
     wordlist=[]
     # MeCabならURLを経由しないから全部まるっと投げてしまっていい。
     wordlist=markov.wakati_MeCab(tweet_unicode_list)
-    
-    """
-    # いっぺんに投げるとyahooに投げるURLが長くなりすぎてダメなので1ツイートごと細かく区切る
-    for tweet in tweet_unicode_list:
-        # print tweet
-        wordlist=wordlist+markov.wakati_MeCab([tweet])
-        # wordlist=wordlist+markov.wakati_Yahoo([tweet])
-    """
 
     mc_table = markov.make_MC_table2(wordlist)
     
     sentence = markov.generate_sentence2(mc_table, wordlist)
     sentence_list = re.split(u'\n', sentence)
-    tweet = u""
+    
+    sentence_list = \
+        control_tweet.punctuate_control(sentence_list)
+    
+    #tweet = u""
     tweet_index=0
     while(1):
         # 何もない文章が候補に上がる場合がある。

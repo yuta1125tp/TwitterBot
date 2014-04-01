@@ -15,6 +15,7 @@ import sys
 import time # sleep関数のため
 
 import remove_tweet
+import control_tweet
 
 # sys.stdin  = codecs.getreader('utf-8')(sys.stdin)
 # sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
@@ -255,6 +256,9 @@ if __name__ == "__main__":
     print sentence
     
     splited_sentence = re.split(u'\n', sentence)
+    
+    splited_sentence = \
+        control_tweet.punctuate_control(splited_sentence)
     
     # Unicode型はprint関数で出力すると日本語で表示される
     for i in xrange(len(splited_sentence)):
