@@ -74,6 +74,9 @@ def get_info(api, name="kawabottp"):
         os.mkdir(abspath_to_script+"/tweet_log")
     for i in xrange(len(ids)):
         #tweet_dict[ids[i]]=[] # ユーザIDをキーに1ユーザにつき1つのリストにツイートを保存
+        # もしすでに該当するidのpicklefileがある場合は差分を追加する
+        # 現状だと常に上書きしていて最近の20しか見れてない
+        
         try:
             user_timeline = api.get_user_timeline(user_id = ids[i], 
                                                   count = num_tweet)
@@ -96,6 +99,7 @@ def load_info():
                 unicode_list.append(tweet['text'])
     return unicode_list
 
+"""
 def get_samples(api, name='kawabottp'):
     # 指定したユーザーのフォロワーの最近のツイートを取得してtxtファイルに保存
     # ユーザをキーに辞書形式で保存する。無駄かもしれないけど…
@@ -121,7 +125,8 @@ def get_samples(api, name='kawabottp'):
 
     # pbar.finish()
     return tweet_dict
-        
+"""
+     
 def get_friends_id(api, name):
     # 指定したユーザー"が"フォローしているユーザーのID一覧を返す
     try:
