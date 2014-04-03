@@ -53,6 +53,20 @@ def remove_kagi_account(api, ids, name):
     for i in xrange(len(list[u'users'])):
         if list[u'users'][i][u'protected']:
             ids.remove(list[u'users'][i][u'id'])
+
+def get_info(api, name):
+    # 夜中に叩く、api経由で情報を取得もしくは更新して、ローカルに保存する
+    # get_sampleでは独自の辞書形式になおしているけどあんま効果ない気がする。
+    # もちろん明らかに使わない情報を保存しておくのはナンセンスだけど、下手に加工しなくてもいい
+    # 生のままpickleで保存
+    # 保存用のディレクトリにユーザーID毎に保存
+    pass
+
+def load_info():
+    # ローカルに保存した情報を取得する
+    # 現在の仕様だと結局つぶやき内容（Unicode型）のリストしか使ってないので
+    # この関数の中でそれに直して返す
+    pass
             
 def get_samples(api, name='kawabottp'):
     # 指定したユーザーのフォロワーの最近のツイートを取得してtxtファイルに保存
