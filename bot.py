@@ -160,7 +160,7 @@ def tweet_msg():
                   oauth_token=accessToken,
                   oauth_token_secret=accessSecret)
     
-    tweet_dict = get_samples(api)
+    #tweet_dict = get_samples(api)
     get_info(api)
     #remove_tweet.remove_at_tweet(tweet_dict)
     #remove_tweet.remove_url_tweet(tweet_dict)
