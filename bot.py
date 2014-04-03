@@ -17,6 +17,8 @@ import pickle # つぶやきログがpickleで保存されてるのを読み込�
 
 import webapp2
 
+import os
+
 # kawabottpへアクセスするための情報。
 # ちなみに登録時に使用したメールアドレスはyuta1125tp+bot@gmail.com
 consumerKey = 'XR9ImVofpaqa6zqcpeJlgQ'
@@ -54,20 +56,46 @@ def remove_kagi_account(api, ids, name):
         if list[u'users'][i][u'protected']:
             ids.remove(list[u'users'][i][u'id'])
 
-def get_info(api, name):
+def get_info(api, name="kawabottp"):
     # 夜中に叩く、api経由で情報を取得もしくは更新して、ローカルに保存する
     # get_sampleでは独自の辞書形式になおしているけどあんま効果ない気がする。
     # もちろん明らかに使わない情報を保存しておくのはナンセンスだけど、下手に加工しなくてもいい
     # 生のままpickleで保存
     # 保存用のディレクトリにユーザーID毎に保存
-    pass
-
+    # fout = codecs.open('samples.txt', 'w', 'utf-8')
+    
+    # 鍵アカウントの人は使えないので保存しててもダメだから捨ててしまっていい。
+    ids = get_friends_id(api, name)
+    remove_kagi_account(api, ids, name)
+    
+    num_tweet = 20
+    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    if not os.path.exists(abspath_to_script+"/tweet_log"):
+        os.mkdir(abspath_to_script+"/tweet_log")
+    for i in xrange(len(ids)):
+        #tweet_dict[ids[i]]=[] # ユーザIDをキーに1ユーザにつき1つのリストにツイートを保存
+        try:
+            user_timeline = api.get_user_timeline(user_id = ids[i], 
+                                                  count = num_tweet)
+        except Exception as e:
+            print e
+        with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'w') as fout:
+            # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
+            pickle.dump(user_timeline, fout) #, pickle.HIGHEST_PROTOCOL)
+        
 def load_info():
     # ローカルに保存した情報を取得する
     # 現在の仕様だと結局つぶやき内容（Unicode型）のリストしか使ってないので
     # この関数の中でそれに直して返す
-    pass
-            
+    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    unicode_list = []
+    for pklfile in os.listdir(abspath_to_script+"/tweet_log"):
+        with open(abspath_to_script+"/tweet_log/"+pklfile) as fin:
+            user_timeline = pickle.load(fin)
+            for tweet in user_timeline: 
+                unicode_list.append(tweet['text'])
+    return unicode_list
+
 def get_samples(api, name='kawabottp'):
     # 指定したユーザーのフォロワーの最近のツイートを取得してtxtファイルに保存
     # ユーザをキーに辞書形式で保存する。無駄かもしれないけど…
@@ -128,7 +156,7 @@ def tweet_msg():
                   oauth_token_secret=accessSecret)
     
     tweet_dict = get_samples(api)
-    
+    get_info(api)
     #remove_tweet.remove_at_tweet(tweet_dict)
     #remove_tweet.remove_url_tweet(tweet_dict)
     #remove_tweet.remove_retweet(tweet_dict)
@@ -137,12 +165,17 @@ def tweet_msg():
     # 全部合わせて1つのUnicode型変数にする。
     # 全部合わせて1つにするとURLエンコードした時にGAEから開けるURLの上限の長さを超えてしまう。
     # 1ツイート毎別々にYahooに問い合わせる方針に転換。
-    tweet_unicode = u''
+    #tweet_unicode = u''
+    
+    """
     tweet_unicode_list = [] # 1つのつぶやきが1つの要素なリスト
     for i in tweet_dict.keys(): # keys
         for j in xrange(len(tweet_dict[i])):
             tweet_unicode_list.append(tweet_dict[i][j])
-            tweet_unicode += tweet_dict[i][j]
+            #tweet_unicode += tweet_dict[i][j]
+    """
+    
+    tweet_unicode_list = load_info()
     
     # cronで呼び出すと相対パスの始まりがずれるみたい。
     import os

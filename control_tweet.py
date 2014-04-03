@@ -14,7 +14,6 @@ def convert_maru2dot(sentence):
     sentence = re.sub(u"、",u"，", sentence)
     return sentence
 
-    
 def shorten_punctuate(sentence):
     # 。が複数続く場合1つにする。
     return re.sub(u'。+', u'。', sentence)
