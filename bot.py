@@ -158,7 +158,7 @@ def get_followers_id(api, name):
     
 def load_account_info(filename):
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
-    info_list = json.load(open(abspath_to_script+'/'+'filename'))
+    info_list = json.load(open(abspath_to_script + '/' + filename))
     
     username = info_list['username']
     consumerKey = info_list['consumerKey']
