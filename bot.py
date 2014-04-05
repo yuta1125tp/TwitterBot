@@ -170,13 +170,7 @@ def tweet_msg():
     consumerKey,\
     consumerSecret,\
     accessToken,\
-    accessSecret = load_account_info('kawabottp.json')
-    
-    #consumerKey = 'XR9ImVofpaqa6zqcpeJlgQ'
-    #consumerSecret = 'm9UAPDO6bFwuPip7kWT4MbJbMi6fY0POTDz92f9zpQ'
-    #accessToken = '2221327394-qsHDtrC7TgEqATLijM3aM9S4UZyYWeRVjvmyGVw'
-    #accessSecret = 'vXh3cYMbdKyOqUDeMKfCdBz9g4jn6wy66SNHWnUmjC64i'
-    #username = 'kawabottp'
+    accessSecret = load_account_info('kawa1125bot.json')
     
     api = twython.Twython(app_key=consumerKey,
                   app_secret=consumerSecret,
