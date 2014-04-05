@@ -67,7 +67,7 @@ def get_info(api, name="kawabottp"):
     # 差分を保存する。
     
     # 鍵アカウントの人は使えないので保存しててもダメだから捨ててしまっていい。
-    ids = get_friends_id(api, name)
+    ids = get_followers_id(api, name)
     remove_kagi_account(api, ids, name)
     
     num_tweet = 50
@@ -93,17 +93,18 @@ def get_info(api, name="kawabottp"):
             
             for idx, tweet in enumerate(user_timeline):
                 if latest_id < tweet['id']: # 最後に保存した内容より新しい。
-                    print latest_id
-                    print tweet['id']
-                    print tweet['text']
-                    
+                    pass
+                    #print latest_id
+                    #print tweet['id']
+                    #print tweet['text']
                 else:
                     break
-            print len(user_timeline[0:idx])
-            
-            with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'a') as fout:
+            # print len(user_timeline[0:idx])
+            # 新しい分のつぶやきのリストを連結して保存する。
+            tweet_log = user_timeline[0:idx] + tweet_log
+            with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'w+') as fout:
                 # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
-                pickle.dump(user_timeline, fout) #, pickle.HIGHEST_PROTOCOL)
+                pickle.dump(tweet_log, fout, pickle.HIGHEST_PROTOCOL)
 
         else:
             # ログがまだない場合
@@ -169,7 +170,7 @@ def get_friends_id(api, name):
     # print users_friends_list['ids'] # followしているユーザのidのリストを返す 
     return users_friends_list['ids']
     
-def get_follwers_id(api, name):
+def get_followers_id(api, name):
     # 指定したユーザー"を"フォローしているユーザーのID一覧を返す
     try:
         users_followers_list = api.get_followers_ids(screen_name=name)
