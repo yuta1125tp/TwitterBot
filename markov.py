@@ -23,22 +23,6 @@ import control_tweet
 appid = "dj0zaiZpPWNQYUtGT0phWWV6bCZzPWNvbnN1bWVyc2VjcmV0Jng9ODU-"  # 登録したアプリケーションID
 pageurl = "http://jlp.yahooapis.jp/MAService/V1/parse"
 
-"""
-def wakati(text):
-    t = MeCab.Tagger("-Owakati")
-    m = t.parse(text.encode('utf-8'))
-    # parseで分かち書きにされるのはスペースで区切られたstr
-    # print 'print m'
-    # print m #.encode('utf-8')
-    # Unix系ならrstripするのは\nだけでいいけど、Windowsは\r\nを除いてあげなきゃいけない
-    result = m.rstrip(" \r\n").split(" ")
-    # そのstrからスペース+改行文字を除き、スペース毎に分割したものがlist構造で格納されてるresult
-    # MeCabで処理した結果は文字列型なのでUnicode型にデコードしてやる
-    for i in xrange(len(result)):
-        result[i] = unicode(result[i], 'utf-8', 'ignore')    
-    return result
-"""
-
 def wakati_MeCab(sentence, appid=appid, results="ma", filter="1|2|3|4|5|6|7|8|9|10|11|12|13"):
     # MeCabを利用してわかつ
     # 改行文字が除かれていないので注意。
