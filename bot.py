@@ -131,34 +131,6 @@ def load_info():
                 unicode_list.append(tweet['text'])
     return unicode_list
 
-"""
-def get_samples(api, name='kawabottp'):
-    # 指定したユーザーのフォロワーの最近のツイートを取得してtxtファイルに保存
-    # ユーザをキーに辞書形式で保存する。無駄かもしれないけど…
-    
-    # fout = codecs.open('samples.txt', 'w', 'utf-8')
-    
-    ids = get_friends_id(api, name)
-    remove_kagi_account(api, ids, name)
-    
-    num_tweet = 20
-    
-    tweet_dict = {}
-    for i in xrange(len(ids)):
-        tweet_dict[ids[i]]=[] # ユーザIDをキーに1ユーザにつき1つのリストにツイートを保存
-        try:
-            user_timeline = api.get_user_timeline(user_id = ids[i], 
-                                                  count = num_tweet)
-        except Exception as e:
-            print e
-        for j in xrange(len(user_timeline)):
-            tweet_dict[ids[i]].append(user_timeline[j]['text'])
-
-
-    # pbar.finish()
-    return tweet_dict
-"""
-     
 def get_friends_id(api, name):
     # 指定したユーザー"が"フォローしているユーザーのID一覧を返す
     try:
@@ -192,26 +164,7 @@ def tweet_msg():
                   oauth_token=accessToken,
                   oauth_token_secret=accessSecret)
     
-    #tweet_dict = get_samples(api)
     get_info(api)
-    return 0
-    #remove_tweet.remove_at_tweet(tweet_dict)
-    #remove_tweet.remove_url_tweet(tweet_dict)
-    #remove_tweet.remove_retweet(tweet_dict)
-    
-    # 辞書として持ってても仕方ないので辞書の解体
-    # 全部合わせて1つのUnicode型変数にする。
-    # 全部合わせて1つにするとURLエンコードした時にGAEから開けるURLの上限の長さを超えてしまう。
-    # 1ツイート毎別々にYahooに問い合わせる方針に転換。
-    #tweet_unicode = u''
-    
-    """
-    tweet_unicode_list = [] # 1つのつぶやきが1つの要素なリスト
-    for i in tweet_dict.keys(): # keys
-        for j in xrange(len(tweet_dict[i])):
-            tweet_unicode_list.append(tweet_dict[i][j])
-            #tweet_unicode += tweet_dict[i][j]
-    """
     
     tweet_unicode_list = load_info()
     
@@ -243,10 +196,10 @@ def tweet_msg():
     sentence = markov.generate_sentence2(mc_table, wordlist)
     sentence_list = re.split(u'\n', sentence)
     
+    # 句読点周りを整形 
     sentence_list = \
         control_tweet.punctuate_control(sentence_list)
     
-    #tweet = u""
     tweet_index=0
     while(1):
         # 何もない文章が候補に上がる場合がある。
