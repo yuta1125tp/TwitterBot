@@ -117,7 +117,7 @@ def load_info():
     return unicode_list
 
 def get_friends_id(api, name):
-    # 指定したユーザー"が"フォローしているユーザーのID一覧を返す
+    # 指定したユーザー"が"フォローしているユーザーのIDをリストで返す
     try:
         users_friends_list = api.get_friends_ids(screen_name=name)
     except Exception as e:
@@ -128,7 +128,7 @@ def get_friends_id(api, name):
     return users_friends_list['ids']
     
 def get_followers_id(api, name):
-    # 指定したユーザー"を"フォローしているユーザーのID一覧を返す
+    # 指定したユーザー"を"フォローしているユーザーのIDをリストで返す
     try:
         users_followers_list = api.get_followers_ids(screen_name=name)
     except Exception as e:
@@ -137,6 +137,16 @@ def get_followers_id(api, name):
     # print len(users_friends_list) # 要素が5つ
     # print users_friends_list['ids'] # followしているユーザのidのリストを返す 
     return users_followers_list['ids']
+    
+def create_friendship(api, ids):
+    # 指定したidをフォローする
+    for id in ids:
+        api.create_friendship(user_id=id)
+
+def remove_friendship(api, ids):
+    # 指定したidをリムーブする
+    for id in ids:
+        api.destroy_friendship(user_id=id)
     
 def load_account_info(filename):
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
@@ -153,7 +163,34 @@ def load_account_info(filename):
            consumerSecret,\
            accessToken,\
            accessSecret
+
+def update_info():
+    # 一日一回ぐらい叩いてフォローの関係を更新、
+    # フォロワーのつぶやきを見てローカルに保存し直す
     
+    username,\
+    consumerKey,\
+    consumerSecret,\
+    accessToken,\
+    accessSecret = load_account_info('kawa1125bot.json')
+    
+    api = twython.Twython(app_key=consumerKey,
+                  app_secret=consumerSecret,
+                  oauth_token=accessToken,
+                  oauth_token_secret=accessSecret)
+    
+    followers_id = get_followers_id(api, username)
+    friends_id = get_friends_id(api, username)
+    
+    # 集合の差をとる
+    follower_only = list(set(followers_id) - set(friends_id))
+    friend_only = list(set(friends_id) - set(followers_id))
+    
+    create_friendship(api, follower_only)
+    remove_friendship(api, friend_only)
+    
+    get_info(api, username)
+          
 def tweet_msg():
         
     username,\
@@ -167,7 +204,7 @@ def tweet_msg():
                   oauth_token=accessToken,
                   oauth_token_secret=accessSecret)
     
-    get_info(api,username)
+    #get_info(api,username)
     
     tweet_unicode_list = load_info()
     
@@ -211,5 +248,6 @@ def tweet_msg():
         print e    
 
 if __name__=="__main__":
-    tweet_msg()
+    update_info()
+    #tweet_msg()
 
