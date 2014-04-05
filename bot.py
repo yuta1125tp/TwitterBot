@@ -155,7 +155,7 @@ def create_friendship(api, ids):
             api.create_friendship(user_id=id)
     
     # 了承待ちのidの保存
-    waiting_ids = list(set(ids) - set(waiting_ids) + set(waitin_ids))
+    waiting_ids = list(set(ids) - set(waiting_ids)) + waiting_ids
     with open(abspath_to_script + "/waiting_ids.pkl", 'w') as fout:
         pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
         
@@ -163,7 +163,11 @@ def remove_friendship(api, ids):
     # 指定したidをリムーブする
     for id in ids:
         api.destroy_friendship(user_id=id)
-    
+
+def update_waiting_ids():
+    # waiting_ids.pklを更新する
+    pass
+
 def load_account_info(filename):
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
     info_list = json.load(open(abspath_to_script + '/' + filename))
