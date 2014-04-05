@@ -213,13 +213,7 @@ def generate_sentence1(MCtable, wordlist):
     return sentence
  
 if __name__ == "__main__":
-    fout = open('out.txt', 'w')
-    """
-    filename = "samples.txt"
-    src = codecs.open(filename, 'r', 'utf-8').read()
-    # src = open(filename, 'r').read()
-    print src# .decode('utf-8')
-    """
+    # fout = open('out.txt', 'w')
     
     f = open('tweet_log.pkl')
     
@@ -266,5 +260,5 @@ if __name__ == "__main__":
         
         
     # 保存する際はUnicode型から文字列型にエンコードする
-    fout.write(sentence.encode('utf-8'))
+    # fout.write(sentence.encode('utf-8'))
     # print sentence.encode('utf-8')
