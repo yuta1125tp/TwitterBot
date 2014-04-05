@@ -64,12 +64,15 @@ def get_info(api, name="kawabottp"):
     # 保存用のディレクトリにユーザーID毎に保存
     # fout = codecs.open('samples.txt', 'w', 'utf-8')
     
+    # 差分を保存する。
+    
     # 鍵アカウントの人は使えないので保存しててもダメだから捨ててしまっていい。
     ids = get_friends_id(api, name)
     remove_kagi_account(api, ids, name)
     
-    num_tweet = 20
+    num_tweet = 50
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    
     if not os.path.exists(abspath_to_script+"/tweet_log"):
         os.mkdir(abspath_to_script+"/tweet_log")
     for i in xrange(len(ids)):
@@ -77,14 +80,42 @@ def get_info(api, name="kawabottp"):
         # もしすでに該当するidのpicklefileがある場合は差分を追加する
         # 現状だと常に上書きしていて最近の20しか見れてない
         
-        try:
-            user_timeline = api.get_user_timeline(user_id = ids[i], 
-                                                  count = num_tweet)
-        except Exception as e:
-            print e
-        with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'w') as fout:
-            # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
-            pickle.dump(user_timeline, fout) #, pickle.HIGHEST_PROTOCOL)
+        # すでにログがある場合
+        if os.path.exists(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl"):              
+            with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'r') as fin:
+                tweet_log = pickle.load(fin)
+                latest_id = tweet_log[0]['id']
+            try:
+                user_timeline = api.get_user_timeline(user_id = ids[i], 
+                                                      count = num_tweet)
+            except Exception as e:
+                print e
+            
+            for idx, tweet in enumerate(user_timeline):
+                if latest_id < tweet['id']: # 最後に保存した内容より新しい。
+                    print latest_id
+                    print tweet['id']
+                    print tweet['text']
+                    
+                else:
+                    break
+            print len(user_timeline[0:idx])
+            
+            with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'a') as fout:
+                # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
+                pickle.dump(user_timeline, fout) #, pickle.HIGHEST_PROTOCOL)
+
+        else:
+            # ログがまだない場合
+            try:
+                user_timeline = api.get_user_timeline(user_id = ids[i], 
+                                                      count = num_tweet)
+            except Exception as e:
+                print e
+            
+            with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'a') as fout:
+                # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
+                pickle.dump(user_timeline, fout) #, pickle.HIGHEST_PROTOCOL)
         
 def load_info():
     # ローカルに保存した情報を取得する
@@ -162,6 +193,7 @@ def tweet_msg():
     
     #tweet_dict = get_samples(api)
     get_info(api)
+    return 0
     #remove_tweet.remove_at_tweet(tweet_dict)
     #remove_tweet.remove_url_tweet(tweet_dict)
     #remove_tweet.remove_retweet(tweet_dict)
