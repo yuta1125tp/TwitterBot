@@ -21,14 +21,6 @@ import os
 
 import json
 
-# kawabottpへアクセスするための情報。
-# ちなみに登録時に使用したメールアドレスはyuta1125tp+bot@gmail.com
-#consumerKey = 'XR9ImVofpaqa6zqcpeJlgQ'
-#consumerSecret = 'm9UAPDO6bFwuPip7kWT4MbJbMi6fY0POTDz92f9zpQ'
-#accessToken = '2221327394-qsHDtrC7TgEqATLijM3aM9S4UZyYWeRVjvmyGVw'
-#accessSecret = 'vXh3cYMbdKyOqUDeMKfCdBz9g4jn6wy66SNHWnUmjC64i'
-#username = 'kawabottp'
-
 def load_dic(load_name):
     # 言葉を読み込んでくる。
     f = codecs.open(load_name, 'r', 'utf-8')
