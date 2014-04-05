@@ -19,12 +19,15 @@ import webapp2
 
 import os
 
+import json
+
 # kawabottpへアクセスするための情報。
 # ちなみに登録時に使用したメールアドレスはyuta1125tp+bot@gmail.com
-consumerKey = 'XR9ImVofpaqa6zqcpeJlgQ'
-consumerSecret = 'm9UAPDO6bFwuPip7kWT4MbJbMi6fY0POTDz92f9zpQ'
-accessToken = '2221327394-qsHDtrC7TgEqATLijM3aM9S4UZyYWeRVjvmyGVw'
-accessSecret = 'vXh3cYMbdKyOqUDeMKfCdBz9g4jn6wy66SNHWnUmjC64i'
+#consumerKey = 'XR9ImVofpaqa6zqcpeJlgQ'
+#consumerSecret = 'm9UAPDO6bFwuPip7kWT4MbJbMi6fY0POTDz92f9zpQ'
+#accessToken = '2221327394-qsHDtrC7TgEqATLijM3aM9S4UZyYWeRVjvmyGVw'
+#accessSecret = 'vXh3cYMbdKyOqUDeMKfCdBz9g4jn6wy66SNHWnUmjC64i'
+#username = 'kawabottp'
 
 def load_dic(load_name):
     # 言葉を読み込んでくる。
@@ -56,7 +59,7 @@ def remove_kagi_account(api, ids, name):
         if list[u'users'][i][u'protected']:
             ids.remove(list[u'users'][i][u'id'])
 
-def get_info(api, name="kawabottp"):
+def get_info(api, name):
     # 夜中に叩く、api経由で情報を取得もしくは更新して、ローカルに保存する
     # get_sampleでは独自の辞書形式になおしているけどあんま効果ない気がする。
     # もちろん明らかに使わない情報を保存しておくのはナンセンスだけど、下手に加工しなくてもいい
@@ -153,18 +156,42 @@ def get_followers_id(api, name):
     # print users_friends_list['ids'] # followしているユーザのidのリストを返す 
     return users_followers_list['ids']
     
-def tweet_msg():
+def load_account_info(filename):
+    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    info_list = json.load(open(abspath_to_script+'/'+'filename'))
     
-    #dictionary = load_dic('dictionary.txt')
-    #save_dic(dictionary, 'dictionary2.txt')
-    #random_tweet(dictionary)
+    username = info_list['username']
+    consumerKey = info_list['consumerKey']
+    consumerSecret = info_list['consumerSecret']
+    accessToken = info_list['accessToken']
+    accessSecret = info_list['accessSecret']
+    
+    return username,\
+           consumerKey,\
+           consumerSecret,\
+           accessToken,\
+           accessSecret
+    
+def tweet_msg():
+        
+    username,\
+    consumerKey,\
+    consumerSecret,\
+    accessToken,\
+    accessSecret = load_account_info('kawabottp.json')
+    
+    #consumerKey = 'XR9ImVofpaqa6zqcpeJlgQ'
+    #consumerSecret = 'm9UAPDO6bFwuPip7kWT4MbJbMi6fY0POTDz92f9zpQ'
+    #accessToken = '2221327394-qsHDtrC7TgEqATLijM3aM9S4UZyYWeRVjvmyGVw'
+    #accessSecret = 'vXh3cYMbdKyOqUDeMKfCdBz9g4jn6wy66SNHWnUmjC64i'
+    #username = 'kawabottp'
     
     api = twython.Twython(app_key=consumerKey,
                   app_secret=consumerSecret,
                   oauth_token=accessToken,
                   oauth_token_secret=accessSecret)
     
-    get_info(api)
+    get_info(api,username)
     
     tweet_unicode_list = load_info()
     

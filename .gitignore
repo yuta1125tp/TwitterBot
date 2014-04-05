@@ -84,5 +84,8 @@ BuildLog.htm
 *.sdf*
 *.opensdf
 ipch/
+
 # tweet_log 以下には 保存した過去のつぶやきが含まれる、別に管理しなくても良い
 tweet_log/
+
+# API経由でbotにアクセスするための情報を含む
