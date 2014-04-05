@@ -204,10 +204,10 @@ def update_info():
     
     # 集合の差をとる
     follower_only = list(set(followers_id) - set(friends_id))
-    friend_only = list(set(friends_id) - set(followers_id))
+    follow_only = list(set(friends_id) - set(followers_id))
     
     create_friendship(api, follower_only)
-    remove_friendship(api, friend_only)
+    remove_friendship(api, follow_only)
     
     get_info(api, username)
           
