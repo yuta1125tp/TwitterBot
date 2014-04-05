@@ -140,9 +140,25 @@ def get_followers_id(api, name):
     
 def create_friendship(api, ids):
     # 指定したidをフォローする
+    # 過去にフォローのリクエストを送った人物に返事が来る前に再度送ろうとすると怒られる。
+    # あと、リクエストが拒否された人に何度もリクエストを送るのも頭良くない。
+    # 「リクエスト送ったけど承認されてないidリスト」をローカルに保存しておく。
+    # 承認された時 このリストからidを抜くとちょうどいい？
+    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    with open(abspath_to_script + "/waiting_id.pkl", 'r') as fin:
+        waiting_ids = pickle.load(fin)
+    
     for id in ids:
-        api.create_friendship(user_id=id)
-
+        if id in waiting_ids: 
+            pass
+        else:
+            api.create_friendship(user_id=id)
+    
+    # 了承待ちのidの保存
+    waiting_ids = list(set(ids) - set(waiting_ids) + set(waitin_ids))
+    with open(abspath_to_script + "/waiting_id.pkl", 'w') as fout:
+        pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
+        
 def remove_friendship(api, ids):
     # 指定したidをリムーブする
     for id in ids:
