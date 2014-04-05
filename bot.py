@@ -15,7 +15,7 @@ import control_tweet # 生成したつぶやきをいじくるモジュール
 
 import pickle # つぶやきログがpickleで保存されてるのを読み込むため
 
-import webapp2
+# import webapp2
 
 import os
 
@@ -71,10 +71,6 @@ def get_info(api, name):
     if not os.path.exists(abspath_to_script+"/tweet_log"):
         os.mkdir(abspath_to_script+"/tweet_log")
     for i in xrange(len(ids)):
-        #tweet_dict[ids[i]]=[] # ユーザIDをキーに1ユーザにつき1つのリストにツイートを保存
-        # もしすでに該当するidのpicklefileがある場合は差分を追加する
-        # 現状だと常に上書きしていて最近の20しか見れてない
-        
         # すでにログがある場合
         if os.path.exists(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl"):              
             with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'r') as fin:
@@ -89,16 +85,11 @@ def get_info(api, name):
             for idx, tweet in enumerate(user_timeline):
                 if latest_id < tweet['id']: # 最後に保存した内容より新しい。
                     pass
-                    #print latest_id
-                    #print tweet['id']
-                    #print tweet['text']
                 else:
                     break
-            # print len(user_timeline[0:idx])
             # 新しい分のつぶやきのリストを連結して保存する。
             tweet_log = user_timeline[0:idx] + tweet_log
             with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'w+') as fout:
-                # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
                 pickle.dump(tweet_log, fout, pickle.HIGHEST_PROTOCOL)
 
         else:
@@ -110,8 +101,7 @@ def get_info(api, name):
                 print e
             
             with open(abspath_to_script+"/tweet_log/"+str(ids[i])+".pkl", 'a') as fout:
-                # HIGHEST_PROTOCOLを指定するとloadできなくなる！要検証
-                pickle.dump(user_timeline, fout) #, pickle.HIGHEST_PROTOCOL)
+                pickle.dump(user_timeline, fout, pickle.HIGHEST_PROTOCOL)
         
 def load_info():
     # ローカルに保存した情報を取得する
@@ -196,9 +186,6 @@ def tweet_msg():
     remove_tweet.remove_at_tweet(tweet_unicode_list)
     remove_tweet.remove_url_tweet(tweet_unicode_list)
     
-    # print tweet_unicode
-    # src = codecs.open("samples.txt", 'r', 'utf-8').read()
-
     import markov
     wordlist=[]
     # MeCabならURLを経由しないから全部まるっと投げてしまっていい。
@@ -210,16 +197,14 @@ def tweet_msg():
     sentence_list = re.split(u'\n', sentence)
     
     # 句読点周りを整形 
-    sentence_list = \
-        control_tweet.punctuate_control(sentence_list)
+    sentence_list = control_tweet.punctuate_control(sentence_list)
     
     tweet_index=0
     while(1):
-        # 何もない文章が候補に上がる場合がある。
+        # 何もない文章が候補に上がる場合がある？
         if sentence_list[tweet_index]!=u'':
             break
         tweet_index += 1
-    
     try:
         api.update_status(status=sentence_list[tweet_index])
     except twython.TwythonError as e:
