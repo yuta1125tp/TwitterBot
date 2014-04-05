@@ -89,3 +89,4 @@ ipch/
 tweet_log/
 
 # API経由でbotにアクセスするための情報を含む
+kawabot.json
