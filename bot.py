@@ -319,15 +319,9 @@ def handle_options():
     return parser.parse_args()
         
 if __name__=="__main__":
-<<<<<<< HEAD
-    # update_info()
-    # tweet_msg()
-=======
-    (options, args) = handle_options()
-    
+    (options, args) = handle_options()    
     if options.update:
         update_info()
     if options.tweet:
         tweet_msg()
->>>>>>> 484808f5a5368e42cd44feb327cdb2e644b7a131
     pass
