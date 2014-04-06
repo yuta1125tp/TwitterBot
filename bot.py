@@ -309,6 +309,6 @@ def tweet_msg():
         print e    
 
 if __name__=="__main__":
-    update_info()
+    # update_info()
     # tweet_msg()
     pass
