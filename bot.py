@@ -306,7 +306,7 @@ def tweet_msg():
     except twython.TwythonError as e:
         print e    
 
-if __name__=="__main__":
+def handle_options():
     parser = OptionParser()
     parser.set_defaults(tweet=False)
     parser.set_defaults(update=False)
@@ -316,11 +316,13 @@ if __name__=="__main__":
     parser.add_option("-u", "--update", dest="update",
                       action="store_true",
                       help = "to kick update_info().")
-
-    (options, args) = parser.parse_args()
+    return parser.parse_args()
+        
+if __name__=="__main__":
+    (options, args) = handle_options()
     
-    if options['update']:
+    if options.update:
         update_info()
-    if options['tweet']:
+    if options.tweet:
         tweet_msg()
     pass
