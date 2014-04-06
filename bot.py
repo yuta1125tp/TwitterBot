@@ -21,24 +21,6 @@ import os
 
 import json
 
-"""
-def load_dic(load_name):
-    # 言葉を読み込んでくる。
-    f = codecs.open(load_name, 'r', 'utf-8')
-    data = f.read() # .txtの中身全部を読み込んでくる。
-    dictionary = data.split('\n')
-    # for word in dictionary:
-    #     print word
-    # print
-    return dictionary
-
-def save_dic(dictionary, save_name):
-    # 言葉を保存する。
-    f = codecs.open(save_name, 'w', 'utf-8')
-    for word in dictionary:
-        f.write(word+'\n')
-"""    
-
 def random_tweet(dictionary):
     # 保持している辞書からランダムに選んで表示する
     for i in xrange(10):
@@ -48,10 +30,11 @@ def remove_kagi_account(api, ids, name):
     # 鍵付きアカウントの内容をツイートしてしまってはまずいので
     # 鍵付きｱカウントのIDを削除する
     index = []
-    list = api.get_followers_list(screen_name = name)
-    for i in xrange(len(list[u'users'])):
-        if list[u'users'][i][u'protected']:
-            ids.remove(list[u'users'][i][u'id'])
+
+    tmplist = api.get_followers_list(screen_name = name)
+    for i in xrange(len(tmplist[u'users'])):
+        if tmplist[u'users'][i][u'protected']:
+            ids.remove(tmplist[u'users'][i][u'id'])
 
 def get_info(api, name):
     # 夜中に叩く、api経由で情報を取得もしくは更新して、ローカルに保存する
@@ -64,8 +47,12 @@ def get_info(api, name):
     # 差分を保存する。
     
     # 鍵アカウントの人は使えないので保存しててもダメだから捨ててしまっていい。
-    ids = get_followers_id(api, name)
-    remove_kagi_account(api, ids, name)
+    #ids = get_followers_id(api, name)
+    #remove_kagi_account(api, ids, name)
+    
+    followers_list = api.get_followers_list(screen_name=name)
+     
+    ids=
     
     num_tweet = 50
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
@@ -197,20 +184,32 @@ def load_account_info(filename):
 
 def create_friendship_via_follow_support(api, username):
     # @follow_supportというアカウントを通してfollower獲得を目指す。
-    num_new_friends = 50
+    num_new_friends = 500
     ids = get_followers_id(api, 'follow_support')
     already_following = get_friends_id(api, username)
+    
+    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
+    if os.path.exists(abspath_to_script+"/waiting_list.pkl"):
+        with open(abspath_to_script+"/waiting_list.pkl", 'r') as fin:
+            waiting_ids = pickle.load(fin)
+    else:
+        waiting_ids = []
+    
     counter = 0
     for id in ids:
         if counter > num_new_friends:
             break
-        if not(id in already_following):            
+        waiting_ids.append(id)
+        if not(id in already_following):# and not(id in waiting_ids):            
             try:
                 api.create_friendship(user_id=id)
                 counter += 1
             except twython.TwythonError as e:
                 print e        
-        
+        waiting_ids = list(set(waiting_ids) - set(already_following))
+    with open(abspath_to_script+"/waiting_list.pkl", 'w') as fout:
+        pickle.dump(waiting_ids, fout, pickle.HEIGHEST_PROTOCOL)
+
 def update_info():
     # 一日一回ぐらい叩いてフォローの関係を更新、
     # フォロワーのつぶやきを見てローカルに保存し直す
@@ -227,7 +226,7 @@ def update_info():
                   oauth_token_secret=accessSecret)
     
     # follow_supportを経由してフォローを増やす
-    create_friendship_via_follow_support(api, username)
+    # create_friendship_via_follow_support(api, username)
     
     # 現在のフォロー・フォロワーの関係を取得
     followers_id = get_followers_id(api, username)
@@ -237,6 +236,7 @@ def update_info():
     followed_only = list(set(followers_id) - set(friends_id))
     following_only = list(set(friends_id) - set(followers_id))  
     
+    # わざわざfollowをやめる必要もない。 
     create_friendship(api, followed_only, friends_id)
     remove_friendship(api, following_only)
     
@@ -299,6 +299,6 @@ def tweet_msg():
         print e    
 
 if __name__=="__main__":
-    update_info()
-    #tweet_msg()
-
+    # update_info()
+    # tweet_msg()
+    pass
