@@ -153,7 +153,7 @@ def create_friendship(api, following_only_id, friends_id):
     else:
         waiting_ids = []
 
-        for id in following_only_id:
+    for id in following_only_id:
         if id in waiting_ids: 
             pass
         else:
