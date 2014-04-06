@@ -310,5 +310,5 @@ def tweet_msg():
 
 if __name__=="__main__":
     # update_info()
-    # tweet_msg()
+    tweet_msg()
     pass
