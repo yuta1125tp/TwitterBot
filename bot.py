@@ -15,6 +15,8 @@ import control_tweet # 生成したつぶやきをいじくるモジュール
 
 import pickle # つぶやきログがpickleで保存されてるのを読み込むため
 
+from optparse import OptionParser
+
 # import webapp2
 
 import os
@@ -42,11 +44,7 @@ def remove_kagi_account(api, ids, name):
     for user in list(followers_list):
         if user['protected']:
             ids.remove(user['id'])
-    """
-    for i in xrange(len(tmplist[u'users'])):
-        if tmplist[u'users'][i][u'protected']:
-            ids.remove(tmplist[u'users'][i][u'id'])
-    """
+
 def get_info(api, name):
     # 夜中に叩く、api経由で情報を取得もしくは更新して、ローカルに保存する
     # get_sampleでは独自の辞書形式になおしているけどあんま効果ない気がする。
@@ -236,7 +234,7 @@ def update_info():
                   oauth_token_secret=accessSecret)
     
     # follow_supportを経由してフォローを増やす
-    # create_friendship_via_follow_support(api, username)
+    create_friendship_via_follow_support(api, username)
     
     # 現在のフォロー・フォロワーの関係を取得
     followers_id = get_followers_id(api, username)
@@ -308,7 +306,28 @@ def tweet_msg():
     except twython.TwythonError as e:
         print e    
 
+def handle_options():
+    parser = OptionParser()
+    parser.set_defaults(tweet=False)
+    parser.set_defaults(update=False)
+    parser.add_option("-t", "--tweet", dest="tweet",
+                      action="store_true",
+                      help = "to kick tweet_msg().")
+    parser.add_option("-u", "--update", dest="update",
+                      action="store_true",
+                      help = "to kick update_info().")
+    return parser.parse_args()
+        
 if __name__=="__main__":
+<<<<<<< HEAD
     # update_info()
     # tweet_msg()
+=======
+    (options, args) = handle_options()
+    
+    if options.update:
+        update_info()
+    if options.tweet:
+        tweet_msg()
+>>>>>>> 484808f5a5368e42cd44feb327cdb2e644b7a131
     pass
