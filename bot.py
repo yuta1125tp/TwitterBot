@@ -145,9 +145,12 @@ def create_friendship(api, ids):
     # 「リクエスト送ったけど承認されてないidリスト」をローカルに保存しておく。
     # 承認された時 このリストからidを抜くとちょうどいい？
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
-    with open(abspath_to_script + "/waiting_ids.pkl", 'r') as fin:
-        waiting_ids = pickle.load(fin)
-    
+    if os.path.exists(abspath_to_script + "/waiting_ids.pkl"):
+        with open(abspath_to_script + "/waiting_ids.pkl", 'r') as fin:
+            waiting_ids = pickle.load(fin)
+        
+    else:
+        waiting_ids = []
     for id in ids:
         if id in waiting_ids: 
             pass
