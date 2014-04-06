@@ -21,6 +21,7 @@ import os
 
 import json
 
+"""
 def load_dic(load_name):
     # 言葉を読み込んでくる。
     f = codecs.open(load_name, 'r', 'utf-8')
@@ -36,7 +37,8 @@ def save_dic(dictionary, save_name):
     f = codecs.open(save_name, 'w', 'utf-8')
     for word in dictionary:
         f.write(word+'\n')
-        
+"""    
+
 def random_tweet(dictionary):
     # 保持している辞書からランダムに選んで表示する
     for i in xrange(10):
@@ -138,7 +140,7 @@ def get_followers_id(api, name):
     # print users_friends_list['ids'] # followしているユーザのidのリストを返す 
     return users_followers_list['ids']
     
-def create_friendship(api, ids):
+def create_friendship(api, following_only_id, friends_id):
     # 指定したidをフォローする
     # 過去にフォローのリクエストを送った人物に返事が来る前に再度送ろうとすると怒られる。
     # あと、リクエストが拒否された人に何度もリクエストを送るのも頭良くない。
@@ -148,17 +150,24 @@ def create_friendship(api, ids):
     if os.path.exists(abspath_to_script + "/waiting_ids.pkl"):
         with open(abspath_to_script + "/waiting_ids.pkl", 'r') as fin:
             waiting_ids = pickle.load(fin)
-        
     else:
         waiting_ids = []
-    for id in ids:
+
+        for id in following_only_id:
         if id in waiting_ids: 
             pass
         else:
-            api.create_friendship(user_id=id)
+            try:
+                api.create_friendship(user_id=id)
+                waiting_ids.append(id)
+            except twython.TwythonError as e:
+                print e
+
+    # 承認されたidを承認待ちリストから消す
+    for id in friends_id:
+        if id in waiting_ids:
+            waiting_ids.remove(id)
     
-    # 了承待ちのidの保存
-    waiting_ids = list(set(ids) - set(waiting_ids)) + waiting_ids
     with open(abspath_to_script + "/waiting_ids.pkl", 'w') as fout:
         pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
         
@@ -206,11 +215,13 @@ def update_info():
     friends_id = get_friends_id(api, username)
     
     # 集合の差をとる
-    follower_only = list(set(followers_id) - set(friends_id))
-    follow_only = list(set(friends_id) - set(followers_id))
+    followed_only = list(set(followers_id) - set(friends_id))
+    following_only = list(set(friends_id) - set(followers_id))
     
-    create_friendship(api, follower_only)
-    remove_friendship(api, follow_only)
+    
+    
+    create_friendship(api, followed_only, friends_id)
+    remove_friendship(api, following_only)
     
     get_info(api, username)
           
