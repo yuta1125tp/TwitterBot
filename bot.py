@@ -29,13 +29,24 @@ def random_tweet(dictionary):
 def remove_kagi_account(api, ids, name):
     # 鍵付きアカウントの内容をツイートしてしまってはまずいので
     # 鍵付きｱカウントのIDを削除する
-    index = []
 
-    tmplist = api.get_followers_list(screen_name = name)
+    # followerのリストを作る。
+    tmp = api.get_followers_list(screen_name=name)
+    followers_list = tmp['users']
+    while(1):
+        if tmp['next_cursor'] != 0:
+            tmp = api.get_followers_list(screen_name = name, cursor=tmp['next_cursor'])
+            followers_list=followers_list + tmp['users']
+        else:
+            break
+    for user in list(followers_list):
+        if user['protected']:
+            ids.remove(user['id'])
+    """
     for i in xrange(len(tmplist[u'users'])):
         if tmplist[u'users'][i][u'protected']:
             ids.remove(tmplist[u'users'][i][u'id'])
-
+    """
 def get_info(api, name):
     # 夜中に叩く、api経由で情報を取得もしくは更新して、ローカルに保存する
     # get_sampleでは独自の辞書形式になおしているけどあんま効果ない気がする。
@@ -47,12 +58,11 @@ def get_info(api, name):
     # 差分を保存する。
     
     # 鍵アカウントの人は使えないので保存しててもダメだから捨ててしまっていい。
-    #ids = get_followers_id(api, name)
-    #remove_kagi_account(api, ids, name)
+    ids = get_followers_id(api, name)
+    remove_kagi_account(api, ids, name)
     
-    followers_list = api.get_followers_list(screen_name=name)
-     
-    ids=
+    #followers_list = api.get_followers_list(screen_name=name)
+    #ids=
     
     num_tweet = 50
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
@@ -184,7 +194,7 @@ def load_account_info(filename):
 
 def create_friendship_via_follow_support(api, username):
     # @follow_supportというアカウントを通してfollower獲得を目指す。
-    num_new_friends = 500
+    num_new_friends = 5
     ids = get_followers_id(api, 'follow_support')
     already_following = get_friends_id(api, username)
     
@@ -299,6 +309,6 @@ def tweet_msg():
         print e    
 
 if __name__=="__main__":
-    # update_info()
+    update_info()
     # tweet_msg()
     pass
