@@ -142,10 +142,9 @@ def get_followers_id(api, name):
     
 def create_friendship(api, following_only_id, friends_id):
     # 指定したidをフォローする
-    # 過去にフォローのリクエストを送った人物に返事が来る前に再度送ろうとすると怒られる。
-    # あと、リクエストが拒否された人に何度もリクエストを送るのも頭良くない。
+    # ただし、過去にリクエストを送った人には再度送らない。
     # 「リクエスト送ったけど承認されてないidリスト」をローカルに保存しておく。
-    # 承認された時 このリストからidを抜くとちょうどいい？
+
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
     if os.path.exists(abspath_to_script + "/waiting_ids.pkl"):
         with open(abspath_to_script + "/waiting_ids.pkl", 'r') as fin:
@@ -196,6 +195,22 @@ def load_account_info(filename):
            accessToken,\
            accessSecret
 
+def create_friendship_via_follow_support(api, username):
+    # @follow_supportというアカウントを通してfollower獲得を目指す。
+    num_new_friends = 50
+    ids = get_followers_id(api, 'follow_support')
+    already_following = get_friends_id(api, username)
+    counter = 0
+    for id in ids:
+        if counter > num_new_friends:
+            break
+        if not(id in already_following):            
+            try:
+                api.create_friendship(user_id=id)
+                counter += 1
+            except twython.TwythonError as e:
+                print e        
+        
 def update_info():
     # 一日一回ぐらい叩いてフォローの関係を更新、
     # フォロワーのつぶやきを見てローカルに保存し直す
@@ -211,14 +226,16 @@ def update_info():
                   oauth_token=accessToken,
                   oauth_token_secret=accessSecret)
     
+    # follow_supportを経由してフォローを増やす
+    create_friendship_via_follow_support(api, username)
+    
+    # 現在のフォロー・フォロワーの関係を取得
     followers_id = get_followers_id(api, username)
     friends_id = get_friends_id(api, username)
     
-    # 集合の差をとる
+    # 集合の差分をとる
     followed_only = list(set(followers_id) - set(friends_id))
-    following_only = list(set(friends_id) - set(followers_id))
-    
-    
+    following_only = list(set(friends_id) - set(followers_id))  
     
     create_friendship(api, followed_only, friends_id)
     remove_friendship(api, following_only)
