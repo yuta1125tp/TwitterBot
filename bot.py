@@ -207,10 +207,10 @@ def create_friendship_via_follow_support(api, username):
     for id in ids:
         if counter > num_new_friends:
             break
-        waiting_ids.append(id)
-        if not(id in already_following):# and not(id in waiting_ids):            
+        if not(id in already_following) and not(id in waiting_ids):            
             try:
                 api.create_friendship(user_id=id)
+                waiting_ids.append(id)
                 counter += 1
             except twython.TwythonError as e:
                 print e        
@@ -246,7 +246,7 @@ def update_info():
     
     # わざわざfollowをやめる必要もない。 
     create_friendship(api, followed_only, friends_id)
-    remove_friendship(api, following_only)
+    # remove_friendship(api, following_only)
     
     get_info(api, username)
           
