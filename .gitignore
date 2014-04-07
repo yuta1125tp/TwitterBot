@@ -91,4 +91,9 @@ tweet_log/
 # API経由でbotにアクセスするための情報を含む
 kawa1125bot.json
 
+# pklで圧縮したものは別に管理しなくてもいい
+*.pkl
+
+
+
 
