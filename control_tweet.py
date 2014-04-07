@@ -21,7 +21,7 @@ def shorten_punctuate(sentence):
 def multiple_punctuate(sentence):
     # 何かの理由で？複数の句読点が連続した場合はやめる。
     # ？。
-    if bool(re.search(u'.*[。．！？]。$', sentence)):
+    if bool(re.search(u'.*[。．！？…]。$', sentence)):
         sentence = sentence[0:-1]
     return sentence
     
