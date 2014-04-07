@@ -192,7 +192,7 @@ def load_account_info(filename):
 
 def create_friendship_via_follow_support(api, username):
     # @follow_supportというアカウントを通してfollower獲得を目指す。
-    num_new_friends = 5
+    num_new_friends = 10
     ids = get_followers_id(api, 'follow_support')
     already_following = get_friends_id(api, username)
     
