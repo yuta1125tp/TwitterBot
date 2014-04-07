@@ -269,14 +269,9 @@ def tweet_msg():
     tweet_unicode_list = load_info()
     
     # cronで呼び出すと相対パスの始まりがずれるみたい。
-    import os
-    abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
-    f = open(abspath_to_script+'/tweet_log.pkl')
-    l = pickle.load(f)
-    f.close()
+    #import os
+    #abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
 
-    # twitte apiで取ってきた分ともともと保持していた自分のつぶやき履歴を連結する
-    tweet_unicode_list=tweet_unicode_list+l 
     
     # よろしくないツイートを除く
     remove_tweet.remove_retweet(tweet_unicode_list)
