@@ -1,12 +1,70 @@
 # -*-coding:utf-8 -*-
 # 自動生成したつぶやきを後からいじくる
 import re
-"""
+
 def bracket_control(sentence):
-    sentence = only_left_bracket(sentence)
-    sentence = only_right_bracket(sentence)
+    bracket_list = [[u'「',u'」'],
+                    [u'【',u'】'],
+                    [u'（',u'）']]#,
+    #                [u'\(',u'\)']] # 半角括弧の対応がむずい。 (でなく\(でなくてはいけない。
+    for [left_bracket, right_bracket] in bracket_list:
+        sentence = kagi_tozi(sentence, left_bracket, right_bracket)
+        sentence = kagi_hazime(sentence, left_bracket, right_bracket)   
+        sentence = check_nonsense_bracket(sentence, left_bracket+right_bracket)
+    return sentence   
+ 
+def check_nonsense_bracket(sentence, brackets):
+    # 内容がないカギ括弧では意味が無いので削除
+    # 「」とか（）とか
+    list_sentence = list(sentence)
+    re_result = re.search(brackets, sentence)
+    if re_result:
+        list_sentence[re_result.start():re_result.end()]=[]
+    sentence = u''
+    for uni in list_sentence:
+        sentence += uni    
     return sentence
+
     
+    
+def kagi_tozi(sentence, left, right):
+    kagi_stack = []
+    for idx, uni in enumerate(sentence):
+        if bool(re.search(left,uni)):
+            kagi_stack.append(idx)
+        if bool(re.search(right,uni)):
+            if bool(len(kagi_stack)):
+                kagi_stack.pop()
+    for idx in kagi_stack:
+        for i in xrange(len(sentence)-idx):
+            if bool(re.search(u'。',sentence[idx+i])):
+                sentence = sentence[:idx+i+1]+right+sentence[idx+i+1:]
+                break
+    return sentence
+            
+def kagi_hazime(sentence, left, right):
+    list_sentence = list(sentence)
+    list_sentence.reverse() # 逆順に
+    kagi_stack = []
+    for idx, uni in enumerate(list_sentence):
+        if bool(re.search(right,uni)):
+            kagi_stack.append(idx)
+        if bool(re.search(left,uni)):
+            if bool(len(kagi_stack)):
+                kagi_stack.pop()
+    for idx in kagi_stack:
+        for i in xrange(len(list_sentence)-idx):
+            if bool(re.search(u'。',list_sentence[idx+i])):
+                list_sentence.insert(idx+i, left)
+                break
+    list_sentence.reverse()
+    sentence = u''
+    for uni in list_sentence:
+        sentence += uni
+    return sentence
+        
+    
+"""        
 def only_left_bracket(sentence):
     # 対応する右括弧を文末につける。
     #(
@@ -145,9 +203,10 @@ def punctuate_control(sentence_list):
         return_list.append(sentence)
 
     return return_list
-"""    
+
 if __name__=="__main__":
-    uni = u"｛((「「｛私の名前は白川悠太」"
+    # uni = u"｛((「「｛私の名前は白川悠太」"
+    uni = u"「私の名前は白川(」悠太。」「ほげ。"
     print uni
-    print bracket_control(uni)
-"""
+    uni = bracket_control(uni)
+    print uni
