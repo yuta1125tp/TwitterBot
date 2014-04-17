@@ -221,8 +221,7 @@ def create_friendship_via_follow_support(api, username):
     already_following = get_friends_id(api, username)
     waiting_ids = list(set(waiting_ids) - set(already_following))
     with open(abspath_to_script+"/waiting_list.pkl", 'w') as fout:
-        pass
-        #pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
 
 def update_info():
     # 一日一回ぐらい叩いてフォローの関係を更新、
