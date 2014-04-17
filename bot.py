@@ -196,6 +196,8 @@ def create_friendship_via_follow_support(api, username):
     ids = get_followers_id(api, 'follow_support')
     already_following = get_friends_id(api, username)
     
+    # waiting_idsは承認待ちのidリスト、
+    # 承認待ちのユーザに再度リクエストを送ると怒られるので保持。
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
     if os.path.exists(abspath_to_script+"/waiting_list.pkl"):
         with open(abspath_to_script+"/waiting_list.pkl", 'r') as fin:
@@ -214,7 +216,10 @@ def create_friendship_via_follow_support(api, username):
                 counter += 1
             except twython.TwythonError as e:
                 print e        
-        waiting_ids = list(set(waiting_ids) - set(already_following))
+                
+    # 今回リクエストを送った中ですでに承認されている分が増加している
+    already_following = get_friends_id(api, username)
+    waiting_ids = list(set(waiting_ids) - set(already_following))
     with open(abspath_to_script+"/waiting_list.pkl", 'w') as fout:
         pass
         #pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
@@ -249,6 +254,7 @@ def update_info():
     create_friendship(api, followed_only, friends_id)
     # remove_friendship(api, following_only)
     
+    # 最近のつぶやきのログを取得して保存
     get_info(api, username)
           
 def tweet_msg():
