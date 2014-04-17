@@ -135,7 +135,7 @@ def get_followers_id(api, name):
     # print users_friends_list['ids'] # followしているユーザのidのリストを返す 
     return users_followers_list['ids']
     
-def create_friendship(api, following_only_id, friends_id):
+def create_friendship(api, following_only_id, friends_id, username):
     # 指定したidをフォローする
     # ただし、過去にリクエストを送った人には再度送らない。
     # 「リクエスト送ったけど承認されてないidリスト」をローカルに保存しておく。
@@ -156,11 +156,10 @@ def create_friendship(api, following_only_id, friends_id):
                 waiting_ids.append(id)
             except twython.TwythonError as e:
                 print e
-
+    
+    followers_id = get_followers_id(api, username)
     # 承認されたidを承認待ちリストから消す
-    for id in friends_id:
-        if id in waiting_ids:
-            waiting_ids.remove(id)
+    waiting_ids = list(set(waiting_ids) - set(followers_id))
     
     with open(abspath_to_script + "/waiting_ids.pkl", 'w') as fout:
         pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
@@ -199,8 +198,8 @@ def create_friendship_via_follow_support(api, username):
     # waiting_idsは承認待ちのidリスト、
     # 承認待ちのユーザに再度リクエストを送ると怒られるので保持。
     abspath_to_script = os.path.abspath(os.path.dirname(__file__)) 
-    if os.path.exists(abspath_to_script+"/waiting_list.pkl"):
-        with open(abspath_to_script+"/waiting_list.pkl", 'r') as fin:
+    if os.path.exists(abspath_to_script+"/waiting_ids.pkl"):
+        with open(abspath_to_script+"/waiting_ids.pkl", 'r') as fin:
             waiting_ids = pickle.load(fin)
     else:
         waiting_ids = []
@@ -220,9 +219,9 @@ def create_friendship_via_follow_support(api, username):
     # 今回リクエストを送った中ですでに承認されている分が増加している
     already_following = get_friends_id(api, username)
     waiting_ids = list(set(waiting_ids) - set(already_following))
-    with open(abspath_to_script+"/waiting_list.pkl", 'w') as fout:
-        pass
-        #pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
+    with open(abspath_to_script+"/waiting_ids.pkl", 'w') as fout:
+        # pass
+        pickle.dump(waiting_ids, fout, pickle.HIGHEST_PROTOCOL)
 
 def update_info():
     # 一日一回ぐらい叩いてフォローの関係を更新、
@@ -251,7 +250,7 @@ def update_info():
     following_only = list(set(friends_id) - set(followers_id))  
     
     # わざわざfollowをやめる必要もない。 
-    create_friendship(api, followed_only, friends_id)
+    create_friendship(api, followed_only, friends_id, username)
     # remove_friendship(api, following_only)
     
     # 最近のつぶやきのログを取得して保存
