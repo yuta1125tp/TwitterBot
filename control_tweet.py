@@ -11,7 +11,7 @@ def bracket_control(sentence):
         sentence = kagi_tozi(sentence, left_bracket, right_bracket)
         sentence = kagi_hazime(sentence, left_bracket, right_bracket)   
         sentence = check_nonsense_bracket(sentence, left_bracket+right_bracket)
-    return sentence   
+    return sentence
  
 def check_nonsense_bracket(sentence, brackets):
     # 内容がないカギ括弧では意味が無いので削除
@@ -23,9 +23,7 @@ def check_nonsense_bracket(sentence, brackets):
     sentence = u''
     for uni in list_sentence:
         sentence += uni    
-    return sentence
-
-    
+    return sentence  
     
 def kagi_tozi(sentence, left, right):
     kagi_stack = []
@@ -40,6 +38,8 @@ def kagi_tozi(sentence, left, right):
             if bool(re.search(u'。',sentence[idx+i])):
                 sentence = sentence[:idx+i+1]+right+sentence[idx+i+1:]
                 break
+            if i == len(sentence)-idx-1:
+                sentence = sentence + right
     return sentence
             
 def kagi_hazime(sentence, left, right):
@@ -52,11 +52,14 @@ def kagi_hazime(sentence, left, right):
         if bool(re.search(left,uni)):
             if bool(len(kagi_stack)):
                 kagi_stack.pop()
-    for idx in kagi_stack:
-        for i in xrange(len(list_sentence)-idx):
-            if bool(re.search(u'。',list_sentence[idx+i])):
-                list_sentence.insert(idx+i, left)
+    for idx, kagi_idx in enumerate(kagi_stack):
+        for i in xrange(idx,len(list_sentence)-kagi_idx):
+            if bool(re.search(u'。',list_sentence[kagi_idx+i])):
+                list_sentence.insert(kagi_idx+i, left)
                 break
+            if i == len(list_sentence)-kagi_idx-1:
+                list_sentence.append(left)
+
     list_sentence.reverse()
     sentence = u''
     for uni in list_sentence:
@@ -206,7 +209,7 @@ def punctuate_control(sentence_list):
 
 if __name__=="__main__":
     # uni = u"｛((「「｛私の名前は白川悠太」"
-    uni = u"「私の名前は白川(」悠太。」「ほげ。"
+    uni = u"私の名前は白川悠太。」ほげ」"
     print uni
     uni = bracket_control(uni)
     print uni
