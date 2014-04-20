@@ -1,6 +1,7 @@
 # -*-coding:utf-8 -*-
 # 自動生成したつぶやきを後からいじくる
 import re
+import sys
 
 def bracket_control(sentence):
     bracket_list = [[u'「',u'」'],
@@ -33,12 +34,12 @@ def kagi_tozi(sentence, left, right):
         if bool(re.search(right,uni)):
             if bool(len(kagi_stack)):
                 kagi_stack.pop()
-    for idx in kagi_stack:
-        for i in xrange(len(sentence)-idx):
-            if bool(re.search(u'。',sentence[idx+i])):
-                sentence = sentence[:idx+i+1]+right+sentence[idx+i+1:]
+    for idx, kagi_idx in enumerate(kagi_stack):
+        for i in xrange(idx, len(sentence)-kagi_idx):
+            if bool(re.search(u'。',sentence[kagi_idx+i])):
+                sentence = sentence[:kagi_idx+i+1]+right+sentence[kagi_idx+i+1:]
                 break
-            if i == len(sentence)-idx-1:
+            if i == len(sentence)-kagi_idx-1:
                 sentence = sentence + right
     return sentence
             
@@ -54,7 +55,7 @@ def kagi_hazime(sentence, left, right):
                 kagi_stack.pop()
     for idx, kagi_idx in enumerate(kagi_stack):
         for i in xrange(idx,len(list_sentence)-kagi_idx):
-            if bool(re.search(u'。',list_sentence[kagi_idx+i])):
+            if bool(re.search(u'。',list_sentence[kagi_idx+i])) or bool(re.search(u'」',list_sentence[kagi_idx+i])):
                 list_sentence.insert(kagi_idx+i, left)
                 break
             if i == len(list_sentence)-kagi_idx-1:
@@ -191,7 +192,7 @@ def multiple_punctuate(sentence):
     return sentence
     
 def add_punctuate(sentence):
-    # 、が文中にある場合は文末に。を加える。
+    # 、か。が文中にある場合は文末に。を加える。
     pass
     
 def punctuate_control(sentence_list):
@@ -209,7 +210,8 @@ def punctuate_control(sentence_list):
 
 if __name__=="__main__":
     # uni = u"｛((「「｛私の名前は白川悠太」"
-    uni = u"私の名前は白川悠太。」ほげ」"
+    uni = u"私の名前は白川悠太。」ほげ。」ありがとう」しらかわ」"
+    
     print uni
     uni = bracket_control(uni)
     print uni
