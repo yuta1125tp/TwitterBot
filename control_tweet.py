@@ -3,7 +3,16 @@
 import re
 import sys
 
-def bracket_control(sentence):
+def bracket_control(sentence_list):
+    # 生成されたつぶやき候補がUnicode型でリストで入ってる
+    return_list = []
+    for sentence in list(sentence_list):
+        sentence = bracket_check(sentence)
+        return_list.append(sentence)
+
+    return return_list
+
+def bracket_check(sentence):
     bracket_list = [[u'「',u'」'],
                     [u'【',u'】'],
                     [u'（',u'）']]#,
@@ -213,5 +222,5 @@ if __name__=="__main__":
     uni = u"私の名前は白川悠太。」ほげ。」ありがとう」しらかわ」"
     
     print uni
-    uni = bracket_control(uni)
+    uni = bracket_check(uni)
     print uni

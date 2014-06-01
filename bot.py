@@ -294,6 +294,8 @@ def tweet_msg():
     
     # 句読点周りを整形 
     sentence_list = control_tweet.punctuate_control(sentence_list)
+    # 括弧周りを整形
+    sentence_list = control_tweet.bracket_control(sentence_list)
     
     tweet_index=0
     while(1):
