@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 # twython経由でTwitterのAPIを叩く
 
-# twythonを使ったテストコード
 import twython # pythonからtwitterをごちゃごちゃできるライブラリ
 import codecs # 文字コードを指定してファイルの入出力をする場合に使う
 import random # randint使うときに必要
@@ -16,8 +15,6 @@ import control_tweet # 生成したつぶやきをいじくるモジュール
 import pickle # つぶやきログがpickleで保存されてるのを読み込むため
 
 from optparse import OptionParser
-
-# import webapp2
 
 import os
 
@@ -256,7 +253,6 @@ def update_info():
     get_info(api, username)
           
 def tweet_msg():
-        
     username,\
     consumerKey,\
     consumerSecret,\
