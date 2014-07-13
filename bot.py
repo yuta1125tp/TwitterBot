@@ -27,7 +27,7 @@ def random_tweet(dictionary):
 
 def remove_kagi_account(api, ids, name):
     # 鍵付きアカウントの内容をツイートしてしまってはまずいので
-    # 鍵付きｱカウントのIDを削除する
+    # 鍵付きアカウントのIDを削除する
 
     # followerのリストを作る。
     tmp = api.get_followers_list(screen_name=name)
