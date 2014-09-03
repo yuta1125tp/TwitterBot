@@ -3,7 +3,7 @@
 ---
 
 ## 概要
-Twitterのbot(`@kawa1125bot`)のソースコードを練習もかねてBitbucketで管理しています。
+Twitterのbot(`@kawa1125bot`)のソースコードを管理しています。
 
 ---
 
